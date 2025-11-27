@@ -154,6 +154,28 @@ export interface User {
 export interface Media {
   id: string;
   alt: string;
+  /**
+   * Optional caption/description for this image
+   */
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Additional images for this work (e.g., detail shots, alternate views)
+   */
+  additionalImages?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -370,6 +392,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
+  additionalImages?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
