@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     'homepage-hero': HomepageHero;
     'carousel-item': CarouselItem;
+    gallery: Gallery;
     'project-section': ProjectSection;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +84,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'homepage-hero': HomepageHeroSelect<false> | HomepageHeroSelect<true>;
     'carousel-item': CarouselItemSelect<false> | CarouselItemSelect<true>;
+    gallery: GallerySelect<false> | GallerySelect<true>;
     'project-section': ProjectSectionSelect<false> | ProjectSectionSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -189,13 +191,64 @@ export interface CarouselItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery".
+ */
+export interface Gallery {
+  id: string;
+  /**
+   * Name to identify this gallery (e.g., 'Nuces Gallery', 'Project Two Gallery')
+   */
+  name: string;
+  /**
+   * Unique identifier for this gallery
+   */
+  slug: string;
+  images: {
+    image: string | Media;
+    /**
+     * Alternative text for the image
+     */
+    alt?: string | null;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "project-section".
  */
 export interface ProjectSection {
   id: string;
+  /**
+   * Unique identifier for this project (e.g., 'nuces', 'project-two')
+   */
+  slug: string;
   title: string;
-  description: string;
+  /**
+   * Optional subtitle for the project section
+   */
+  subtitle?: string | null;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
   image: string | Media;
+  /**
+   * Optional gallery to display below the section
+   */
+  gallery?: (string | null) | Gallery;
   updatedAt: string;
   createdAt: string;
 }
@@ -238,6 +291,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'carousel-item';
         value: string | CarouselItem;
+      } | null)
+    | ({
+        relationTo: 'gallery';
+        value: string | Gallery;
       } | null)
     | ({
         relationTo: 'project-section';
@@ -348,12 +405,32 @@ export interface CarouselItemSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery_select".
+ */
+export interface GallerySelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "project-section_select".
  */
 export interface ProjectSectionSelect<T extends boolean = true> {
+  slug?: T;
   title?: T;
+  subtitle?: T;
   description?: T;
   image?: T;
+  gallery?: T;
   updatedAt?: T;
   createdAt?: T;
 }

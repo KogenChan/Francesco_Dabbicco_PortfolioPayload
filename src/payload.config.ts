@@ -14,35 +14,37 @@ import { Media } from './collections/Media';
 import { HomepageHero } from './collections/HomepageHero';
 import { CarouselItem } from './collections/CarouselItem';
 import { ProjectSection } from './collections/ProjectSection';
+import { Gallery } from './collections/Gallery';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
-  admin: {
-    user: Users.slug,
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    Users,
-    Media,
-    HomepageHero,   // main hero section
-    CarouselItem,   // carousel images
-    ProjectSection, // featured project
-  ],
-  editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || process.env.MONGODB_URI || '',
-  }),
-  sharp,
-  cors: ['http://localhost:5173'], // allow React dev server
-  plugins: [
-    // storage-adapter-placeholder
-  ],
+   admin: {
+      user: Users.slug,
+      importMap: {
+         baseDir: path.resolve(dirname),
+      },
+   },
+   collections: [
+      Users,
+      Media,
+      HomepageHero,
+      CarouselItem,
+      Gallery,
+      ProjectSection,
+   ],
+   editor: lexicalEditor(),
+   secret: process.env.PAYLOAD_SECRET || '',
+   typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+   },
+   db: mongooseAdapter({
+      url: process.env.DATABASE_URI || process.env.MONGODB_URI || '',
+   }),
+   sharp,
+   cors: ['http://localhost:5173'], // allow React dev server
+   plugins: [
+      // storage-adapter-placeholder
+   ],
 });
