@@ -15,6 +15,7 @@ import { HomepageHero } from './collections/HomepageHero';
 import { CarouselItem } from './collections/CarouselItem';
 import { ProjectSection } from './collections/ProjectSection';
 import { Gallery } from './collections/Gallery';
+import { About } from './collections/About';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -33,6 +34,7 @@ export default buildConfig({
       CarouselItem,
       Gallery,
       ProjectSection,
+      About,
    ],
    editor: lexicalEditor(),
    secret: process.env.PAYLOAD_SECRET || '',

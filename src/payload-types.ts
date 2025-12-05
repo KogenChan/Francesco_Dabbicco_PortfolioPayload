@@ -73,6 +73,7 @@ export interface Config {
     'carousel-item': CarouselItem;
     gallery: Gallery;
     'project-section': ProjectSection;
+    about: About;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +87,7 @@ export interface Config {
     'carousel-item': CarouselItemSelect<false> | CarouselItemSelect<true>;
     gallery: GallerySelect<false> | GallerySelect<true>;
     'project-section': ProjectSectionSelect<false> | ProjectSectionSelect<true>;
+    about: AboutSelect<false> | AboutSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -276,6 +278,60 @@ export interface ProjectSection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about".
+ */
+export interface About {
+  id: string;
+  statement: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  bio: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  history: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -321,6 +377,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'project-section';
         value: string | ProjectSection;
+      } | null)
+    | ({
+        relationTo: 'about';
+        value: string | About;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -455,6 +515,17 @@ export interface ProjectSectionSelect<T extends boolean = true> {
   description?: T;
   image?: T;
   gallery?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about_select".
+ */
+export interface AboutSelect<T extends boolean = true> {
+  statement?: T;
+  bio?: T;
+  history?: T;
   updatedAt?: T;
   createdAt?: T;
 }
