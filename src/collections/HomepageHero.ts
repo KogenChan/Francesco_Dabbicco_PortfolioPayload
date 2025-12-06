@@ -1,5 +1,5 @@
-// cms/src/collections/HomepageHero.ts
 import { CollectionConfig } from "payload";
+import { lexicalEditor } from '@payloadcms/richtext-lexical';
 
 export const HomepageHero: CollectionConfig = {
    slug: "homepage-hero",
@@ -16,9 +16,12 @@ export const HomepageHero: CollectionConfig = {
          required: true,
       },
       {
-         name: "subtitle",
-         type: "textarea",
+         name: "text",
+         type: "richText",
          required: true,
+         editor: lexicalEditor({
+            features: ({ defaultFeatures }) => defaultFeatures,
+         }),
       },
       {
          name: "image",

@@ -34,5 +34,52 @@ export const Media: CollectionConfig = {
          },
       },
    ],
-   upload: true,
+   upload: {
+      staticDir: 'media',
+      imageSizes: [
+         {
+            name: 'thumbnail',
+            width: 400,
+            height: undefined, // Maintains aspect ratio
+            fit: 'inside', // Ensures image fits within bounds without cropping
+            formatOptions: {
+               format: 'webp',
+               options: {
+                  quality: 80,
+               },
+            },
+         },
+         {
+            name: 'card',
+            width: 800,
+            height: undefined, // Maintains aspect ratio
+            fit: 'inside',
+            formatOptions: {
+               format: 'webp',
+               options: {
+                  quality: 85,
+               },
+            },
+         },
+         {
+            name: 'full',
+            width: 2400,
+            height: undefined, // Maintains aspect ratio
+            fit: 'inside',
+            formatOptions: {
+               format: 'webp',
+               options: {
+                  quality: 90,
+               },
+            },
+         },
+      ],
+      formatOptions: {
+         format: 'webp',
+         options: {
+            quality: 90,
+         },
+      },
+      mimeTypes: ['image/*'],
+   },
 };
