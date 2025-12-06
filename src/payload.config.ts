@@ -45,7 +45,13 @@ export default buildConfig({
       url: process.env.DATABASE_URI || process.env.MONGODB_URI || '',
    }),
    sharp,
-   cors: ['http://localhost:5173'], // allow React dev server
+   // Add your production URLs here
+   cors: [
+      'http://localhost:5173', // React dev server
+      process.env.FRONTEND_URL,
+   ].filter((url): url is string => Boolean(url)),
+   // Add serverURL for proper URL generation
+   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
    plugins: [
       // storage-adapter-placeholder
    ],
