@@ -1,14 +1,12 @@
-// cms/src/collections/Gallery.ts
 import { CollectionConfig } from "payload";
+import { byRoleWithPublicRead } from '../access/byRole';
 
 export const Gallery: CollectionConfig = {
    slug: "gallery",
    admin: {
       useAsTitle: "name",
    },
-   access: {
-      read: () => true,
-   },
+   access: byRoleWithPublicRead(['admin', 'client']),
    fields: [
       {
          name: "name",

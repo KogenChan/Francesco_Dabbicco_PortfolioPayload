@@ -1,15 +1,13 @@
-// cms/src/collections/ProjectSection.ts
 import { CollectionConfig } from "payload";
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { byRoleWithPublicRead } from '../access/byRole';
 
 export const ProjectSection: CollectionConfig = {
    slug: "project-section",
    admin: {
       useAsTitle: "title",
    },
-   access: {
-      read: () => true,
-   },
+   access: byRoleWithPublicRead(['admin', 'client']),
    fields: [
       {
          name: "slug",

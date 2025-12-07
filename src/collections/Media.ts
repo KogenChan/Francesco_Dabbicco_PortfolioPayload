@@ -1,11 +1,10 @@
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { byRoleWithPublicRead } from '../access/byRole';
 
 export const Media: CollectionConfig = {
    slug: 'media',
-   access: {
-      read: () => true,
-   },
+   access: byRoleWithPublicRead(['admin', 'client']),
    fields: [
       {
          name: 'alt',
@@ -40,8 +39,8 @@ export const Media: CollectionConfig = {
          {
             name: 'thumbnail',
             width: 400,
-            height: undefined, // Maintains aspect ratio
-            fit: 'inside', // Ensures image fits within bounds without cropping
+            height: undefined,
+            fit: 'inside',
             formatOptions: {
                format: 'webp',
                options: {
@@ -52,7 +51,7 @@ export const Media: CollectionConfig = {
          {
             name: 'card',
             width: 800,
-            height: undefined, // Maintains aspect ratio
+            height: undefined,
             fit: 'inside',
             formatOptions: {
                format: 'webp',
@@ -64,7 +63,7 @@ export const Media: CollectionConfig = {
          {
             name: 'full',
             width: 2400,
-            height: undefined, // Maintains aspect ratio
+            height: undefined,
             fit: 'inside',
             formatOptions: {
                format: 'webp',
