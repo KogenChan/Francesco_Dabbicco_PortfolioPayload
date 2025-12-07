@@ -14,7 +14,7 @@ export const WebPConverter = () => {
             const canvas = document.createElement('canvas')
             
             img.onload = () => {
-               const maxDimension = 8000 // # SIZE
+               const maxDimension = 4000 // # SIZE
                let { width, height } = img
                
                if (width > maxDimension || height > maxDimension) {
