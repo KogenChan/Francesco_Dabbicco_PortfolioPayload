@@ -48,6 +48,9 @@ export default buildConfig({
    sharp,
    cors: [
       'http://localhost:5173',
+      'http://localhost:3000',
+      'https://fdart-payload.vercel.app',
+      'https://*.vercel.app',
       process.env.FRONTEND_URL,
    ].filter((url): url is string => Boolean(url)),
    serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
