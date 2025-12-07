@@ -1,6 +1,7 @@
 // payload.config.ts
 import { mongooseAdapter } from '@payloadcms/db-mongodb';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { s3Storage } from '@payloadcms/storage-s3';
 import path from 'path';
 import { buildConfig } from 'payload';
 import { fileURLToPath } from 'url';
@@ -45,14 +46,31 @@ export default buildConfig({
       url: process.env.DATABASE_URI || process.env.MONGODB_URI || '',
    }),
    sharp,
-   // Add your production URLs here
    cors: [
-      'http://localhost:5173', // React dev server
+      'http://localhost:5173',
       process.env.FRONTEND_URL,
    ].filter((url): url is string => Boolean(url)),
-   // Add serverURL for proper URL generation
    serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
    plugins: [
-      // storage-adapter-placeholder
+      s3Storage({
+         collections: {
+            media: {
+               disablePayloadAccessControl: true,
+               generateFileURL: ({ filename }) => {
+                  return `${process.env.S3_PUBLIC_URL}/${filename}`;
+               },
+            },
+         },
+         bucket: process.env.S3_BUCKET!,
+         config: {
+            endpoint: process.env.S3_ENDPOINT,
+            region: 'auto',
+            credentials: {
+               accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+               secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+            },
+            forcePathStyle: true,
+         },
+      }),
    ],
 });
