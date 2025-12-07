@@ -17,8 +17,7 @@ export const WebPConverter = () => {
             const canvas = document.createElement('canvas')
             
             img.onload = () => {
-               // Aggressive resizing to stay under 4.5MB
-               const maxDimension = 2000 // Reduced from 2500
+               const maxDimension = 8000 // # size
                let { width, height } = img
                
                if (width > maxDimension || height > maxDimension) {
@@ -62,7 +61,7 @@ export const WebPConverter = () => {
                      resolve(webpFile)
                   },
                   'image/webp',
-                  0.80 // Reduced quality to 80% for smaller files
+                  0.92 // # Quality
                )
             }
             
@@ -92,7 +91,7 @@ export const WebPConverter = () => {
          if (file.type === 'image/webp') return
          if (file.type === 'image/svg+xml') return
          
-         console.log('🔄 Converting image...')
+         console.log('Converting image...')
          
          // Stop the original event
          e.stopImmediatePropagation()
