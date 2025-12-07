@@ -28,10 +28,11 @@ export default buildConfig({
          baseDir: path.resolve(dirname),
       },
       components: {
-      afterNavLinks: [
-         './src/components/WebPConverter#WebPConverter',
-      ],
-   },
+         afterNavLinks: [
+            // Fixed path - no ./src prefix needed
+            '/components/WebPConverter#WebPConverter',
+         ],
+      },
    },
    collections: [
       Users,
