@@ -5,16 +5,14 @@ import { useEffect } from 'react'
 async function convertToWebP(file: File): Promise<File> {
    if (!file.type.startsWith('image/')) return file
    if (file.type === 'image/webp') return file
-   if (file.type === 'image/svg+xml') return file // Don't convert SVGs
+   if (file.type === 'image/svg+xml') return file
    
    return new Promise((resolve, reject) => {
       const img = new Image()
       const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
       
       img.onload = () => {
-         // Resize if too large (optional - maintains aspect ratio)
-         const maxDimension = 8000 // Max width or height
+         const maxDimension = 2500
          let { width, height } = img
          
          if (width > maxDimension || height > maxDimension) {
@@ -29,6 +27,7 @@ async function convertToWebP(file: File): Promise<File> {
          
          canvas.width = width
          canvas.height = height
+         const ctx = canvas.getContext('2d')
          
          if (!ctx) {
             reject(new Error('Could not get canvas context'))
@@ -50,12 +49,12 @@ async function convertToWebP(file: File): Promise<File> {
                   { type: 'image/webp' }
                )
                
-               console.log(`Converted ${file.name}: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(webpFile.size / 1024 / 1024).toFixed(2)}MB`)
+               console.log(`✓ Converted: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(webpFile.size / 1024 / 1024).toFixed(2)}MB`)
                
                resolve(webpFile)
             },
             'image/webp',
-            0.92 // 92% quality - excellent for art, usually <4MB
+            0.85
          )
       }
       
@@ -64,38 +63,44 @@ async function convertToWebP(file: File): Promise<File> {
    })
 }
 
-export function WebPUploadInjector() {
+export const UploadInput = () => {
    useEffect(() => {
-      // Intercept all file inputs
-      const handleFileInput = async (e: Event) => {
+      const interceptFileInputs = async (e: Event) => {
          const input = e.target as HTMLInputElement
-         if (!input.files || input.files.length === 0) return
          
-         const originalFile = input.files[0]
+         // Only process file inputs in upload contexts
+         if (input.type !== 'file' || !input.files?.length) return
+         
+         const file = input.files[0]
+         
+         // Only convert images
+         if (!file.type.startsWith('image/')) return
+         
+         console.log('🔄 Intercepted file upload, converting...')
          
          try {
-            const convertedFile = await convertToWebP(originalFile)
+            const convertedFile = await convertToWebP(file)
             
-            // Replace the file in the input
-            const dataTransfer = new DataTransfer()
-            dataTransfer.items.add(convertedFile)
-            input.files = dataTransfer.files
+            // Replace file in input
+            const dt = new DataTransfer()
+            dt.items.add(convertedFile)
+            input.files = dt.files
             
-            // Trigger change event so Payload processes it
-            input.dispatchEvent(new Event('change', { bubbles: true }))
+            // Dispatch change event so Payload processes it
+            const changeEvent = new Event('change', { bubbles: true })
+            input.dispatchEvent(changeEvent)
          } catch (error) {
-            console.error('WebP conversion failed:', error)
-            // If conversion fails, continue with original file
+            console.error('❌ Conversion failed, using original:', error)
          }
       }
       
-      // Listen for file input changes
-      document.addEventListener('change', handleFileInput, true)
+      // Capture phase to intercept before Payload processes
+      document.addEventListener('change', interceptFileInputs, { capture: true })
       
       return () => {
-         document.removeEventListener('change', handleFileInput, true)
+         document.removeEventListener('change', interceptFileInputs, { capture: true })
       }
    }, [])
    
    return null
-};
+}
