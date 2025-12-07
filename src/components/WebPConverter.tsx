@@ -4,10 +4,7 @@ import { useEffect } from 'react'
 
 export const WebPConverter = () => {
    useEffect(() => {
-      console.log('✓ WebP converter loaded')
-      
       const convertToWebP = async (file: File): Promise<File> => {
-         // Skip non-images, WebP, and SVG
          if (!file.type.startsWith('image/')) return file
          if (file.type === 'image/webp') return file
          if (file.type === 'image/svg+xml') return file
@@ -17,7 +14,7 @@ export const WebPConverter = () => {
             const canvas = document.createElement('canvas')
             
             img.onload = () => {
-               const maxDimension = 8000 // # size
+               const maxDimension = 8000 // # SIZE
                let { width, height } = img
                
                if (width > maxDimension || height > maxDimension) {
@@ -54,14 +51,10 @@ export const WebPConverter = () => {
                         { type: 'image/webp' }
                      )
                      
-                     console.log(`✓ Converted: ${file.name}`)
-                     console.log(`  Before: ${(file.size / 1024 / 1024).toFixed(2)}MB`)
-                     console.log(`  After: ${(webpFile.size / 1024 / 1024).toFixed(2)}MB`)
-                     
                      resolve(webpFile)
                   },
                   'image/webp',
-                  0.92 // # Quality
+                  0.90 // # QUALITY
                )
             }
             
@@ -70,7 +63,6 @@ export const WebPConverter = () => {
          })
       }
       
-      // Track converted files to avoid infinite loops
       const convertedFiles = new WeakMap<HTMLInputElement, string>()
       
       const handleFileSelect = async (e: Event) => {
@@ -81,51 +73,31 @@ export const WebPConverter = () => {
          
          const file = input.files[0]
          
-         // Skip if already converted this file
-         if (convertedFiles.get(input) === file.name) {
-            return
-         }
-         
-         // Skip non-images or already WebP
+         if (convertedFiles.get(input) === file.name) return
          if (!file.type.startsWith('image/')) return
          if (file.type === 'image/webp') return
          if (file.type === 'image/svg+xml') return
          
-         console.log('Converting image...')
-         
-         // Stop the original event
          e.stopImmediatePropagation()
          e.preventDefault()
          
          try {
             const convertedFile = await convertToWebP(file)
             
-            // Check if converted file is still too large
-            const sizeMB = convertedFile.size / 1024 / 1024
-            if (sizeMB > 4) {
-               console.warn(`⚠️  File still ${sizeMB.toFixed(2)}MB after conversion. May fail on upload.`)
-            }
-            
-            // Update input with converted file
             const dt = new DataTransfer()
             dt.items.add(convertedFile)
             input.files = dt.files
             
-            // Mark as converted
             convertedFiles.set(input, convertedFile.name)
             
-            // Dispatch new event
             const newEvent = new Event('change', { bubbles: true })
             input.dispatchEvent(newEvent)
             
          } catch (error) {
-            console.error('❌ Conversion failed:', error)
-            // Allow original file through on error
             convertedFiles.set(input, file.name)
          }
       }
       
-      // Listen to file inputs in capture phase
       document.addEventListener('change', handleFileSelect, { capture: true })
       
       return () => {
@@ -133,20 +105,5 @@ export const WebPConverter = () => {
       }
    }, [])
    
-   return (
-      <div style={{ 
-         position: 'fixed', 
-         bottom: '10px', 
-         right: '10px', 
-         background: '#10b981', 
-         color: 'white', 
-         padding: '4px 8px',
-         borderRadius: '4px',
-         fontSize: '11px',
-         zIndex: 9999,
-         fontFamily: 'monospace'
-      }}>
-         WebP ✓
-      </div>
-   )
+   return null
 };
