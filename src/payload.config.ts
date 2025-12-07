@@ -27,6 +27,11 @@ export default buildConfig({
       importMap: {
          baseDir: path.resolve(dirname),
       },
+      components: {
+         beforeDashboard: [
+            '/components/WebPUploadInjector#WebPUploadInjector',
+         ],
+      },
    },
    collections: [
       Users,
