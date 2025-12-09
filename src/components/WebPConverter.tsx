@@ -7,28 +7,30 @@ export const WebPConverter = () => {
       console.log('✓ WebP converter loaded')
       
       const convertToWebP = async (file: File): Promise<File> => {
-         // Skip non-images, WebP, and SVG
          if (!file.type.startsWith('image/')) return file
          if (file.type === 'image/webp') return file
          if (file.type === 'image/svg+xml') return file
+         
+         console.log('🔄 Converting:', file.name, (file.size / 1024 / 1024).toFixed(2) + 'MB')
          
          return new Promise((resolve, reject) => {
             const img = new Image()
             const canvas = document.createElement('canvas')
             
-            img.onload = () => {
-               // Aggressive resizing to stay under 4.5MB
-               const maxDimension = 2000 // Reduced from 2500
+            img.onload = async () => {
                let { width, height } = img
+               const isVertical = height > width
                
-               if (width > maxDimension || height > maxDimension) {
-                  if (width > height) {
-                     height = (height / width) * maxDimension
-                     width = maxDimension
-                  } else {
-                     width = (width / height) * maxDimension
-                     height = maxDimension
-                  }
+               console.log('   Original:', width + 'x' + height, isVertical ? '(vertical)' : '(horizontal)')
+               
+               const maxWidth = isVertical ? 2160 : 3840
+               const maxHeight = isVertical ? 3840 : 2160
+               
+               if (width > maxWidth || height > maxHeight) {
+                  const ratio = Math.min(maxWidth / width, maxHeight / height)
+                  width = Math.round(width * ratio)
+                  height = Math.round(height * ratio)
+                  console.log('   Resized to:', width + 'x' + height)
                }
                
                canvas.width = width
@@ -42,28 +44,26 @@ export const WebPConverter = () => {
                
                ctx.drawImage(img, 0, 0, width, height)
                
-               canvas.toBlob(
-                  (blob) => {
-                     if (!blob) {
-                        reject(new Error('Conversion failed'))
-                        return
-                     }
-                     
+               const maxFileSize = 4.5 * 1024 * 1024
+               const qualities = [0.85, 0.75, 0.65, 0.55, 0.50]
+               
+               for (const quality of qualities) {
+                  const blob = await new Promise<Blob | null>(res => {
+                     canvas.toBlob(blob => res(blob), 'image/webp', quality)
+                  })
+                  
+                  if (blob && blob.size <= maxFileSize) {
                      const webpFile = new File(
                         [blob],
                         file.name.replace(/\.(jpg|jpeg|png|gif|bmp)$/i, '.webp'),
                         { type: 'image/webp' }
                      )
-                     
-                     console.log(`✓ Converted: ${file.name}`)
-                     console.log(`  Before: ${(file.size / 1024 / 1024).toFixed(2)}MB`)
-                     console.log(`  After: ${(webpFile.size / 1024 / 1024).toFixed(2)}MB`)
-                     
-                     resolve(webpFile)
-                  },
-                  'image/webp',
-                  0.80 // Reduced quality to 80% for smaller files
-               )
+                     console.log('   ✓ Success:', (webpFile.size / 1024 / 1024).toFixed(2) + 'MB at ' + Math.round(quality * 100) + '%')
+                     return resolve(webpFile)
+                  }
+               }
+               
+               reject(new Error('Could not compress below 4.5MB'))
             }
             
             img.onerror = () => reject(new Error('Failed to load image'))
@@ -71,66 +71,93 @@ export const WebPConverter = () => {
          })
       }
       
-      // Track converted files to avoid infinite loops
-      const convertedFiles = new WeakMap<HTMLInputElement, string>()
+      // Intercept XMLHttpRequest to modify FormData before upload
+      const originalSend = XMLHttpRequest.prototype.send
+      const originalOpen = XMLHttpRequest.prototype.open
       
-      const handleFileSelect = async (e: Event) => {
-         const input = e.target as HTMLInputElement
-         
-         if (input.type !== 'file') return
-         if (!input.files || input.files.length === 0) return
-         
-         const file = input.files[0]
-         
-         // Skip if already converted this file
-         if (convertedFiles.get(input) === file.name) {
-            return
-         }
-         
-         // Skip non-images or already WebP
-         if (!file.type.startsWith('image/')) return
-         if (file.type === 'image/webp') return
-         if (file.type === 'image/svg+xml') return
-         
-         console.log('🔄 Converting image...')
-         
-         // Stop the original event
-         e.stopImmediatePropagation()
-         e.preventDefault()
-         
-         try {
-            const convertedFile = await convertToWebP(file)
-            
-            // Check if converted file is still too large
-            const sizeMB = convertedFile.size / 1024 / 1024
-            if (sizeMB > 4) {
-               console.warn(`⚠️  File still ${sizeMB.toFixed(2)}MB after conversion. May fail on upload.`)
-            }
-            
-            // Update input with converted file
-            const dt = new DataTransfer()
-            dt.items.add(convertedFile)
-            input.files = dt.files
-            
-            // Mark as converted
-            convertedFiles.set(input, convertedFile.name)
-            
-            // Dispatch new event
-            const newEvent = new Event('change', { bubbles: true })
-            input.dispatchEvent(newEvent)
-            
-         } catch (error) {
-            console.error('❌ Conversion failed:', error)
-            // Allow original file through on error
-            convertedFiles.set(input, file.name)
-         }
+      const pendingRequests = new WeakMap<XMLHttpRequest, { url: string }>()
+      
+      XMLHttpRequest.prototype.open = function(method: string, url: string | URL) {
+         pendingRequests.set(this, { url: url.toString() })
+         // @ts-ignore - Arguments forwarding
+         return originalOpen.apply(this, arguments)
       }
       
-      // Listen to file inputs in capture phase
-      document.addEventListener('change', handleFileSelect, { capture: true })
+      XMLHttpRequest.prototype.send = async function(body?: Document | XMLHttpRequestBodyInit | null) {
+         const requestInfo = pendingRequests.get(this)
+         
+         // Only intercept uploads to the media API endpoint
+         if (requestInfo && requestInfo.url.includes('/api/media') && body instanceof FormData) {
+            console.log('📤 Intercepting upload to:', requestInfo.url)
+            
+            const newFormData = new FormData()
+            let modified = false
+            
+            for (const [key, value] of (body as any).entries()) {
+               if (value instanceof File && value.type.startsWith('image/')) {
+                  try {
+                     console.log('🖼️  Found image field:', key)
+                     const converted = await convertToWebP(value)
+                     newFormData.append(key, converted)
+                     modified = true
+                  } catch (error) {
+                     console.error('❌ Conversion failed:', error)
+                     newFormData.append(key, value)
+                  }
+               } else {
+                  newFormData.append(key, value)
+               }
+            }
+            
+            if (modified) {
+               console.log('✅ Sending converted file')
+               return originalSend.call(this, newFormData)
+            }
+         }
+         
+         return originalSend.call(this, body)
+      }
+      
+      // Also intercept fetch API
+      const originalFetch = window.fetch
+      window.fetch = async function(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+         const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+         
+         if (url.includes('/api/media') && init?.body instanceof FormData) {
+            console.log('📤 Intercepting fetch upload to:', url)
+            
+            const newFormData = new FormData()
+            let modified = false
+            
+            for (const [key, value] of (init.body as any).entries()) {
+               if (value instanceof File && value.type.startsWith('image/')) {
+                  try {
+                     console.log('🖼️  Found image field:', key)
+                     const converted = await convertToWebP(value)
+                     newFormData.append(key, converted)
+                     modified = true
+                  } catch (error) {
+                     console.error('❌ Conversion failed:', error)
+                     newFormData.append(key, value)
+                  }
+               } else {
+                  newFormData.append(key, value)
+               }
+            }
+            
+            if (modified) {
+               console.log('✅ Sending converted file via fetch')
+               return originalFetch(input, { ...init, body: newFormData })
+            }
+         }
+         
+         return originalFetch(input, init)
+      }
       
       return () => {
-         document.removeEventListener('change', handleFileSelect, { capture: true })
+         XMLHttpRequest.prototype.send = originalSend
+         XMLHttpRequest.prototype.open = originalOpen
+         window.fetch = originalFetch
       }
    }, [])
    
