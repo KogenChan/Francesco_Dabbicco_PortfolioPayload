@@ -77,10 +77,14 @@ export const WebPConverter = () => {
       
       const pendingRequests = new WeakMap<XMLHttpRequest, { url: string }>()
       
-      XMLHttpRequest.prototype.open = function(method: string, url: string | URL) {
-         pendingRequests.set(this, { url: url.toString() })
-         // @ts-ignore - Arguments forwarding
-         return originalOpen.apply(this, arguments)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      XMLHttpRequest.prototype.open = function(this: XMLHttpRequest, ...args: any[]) {
+         const url = args[1]
+         if (url) {
+            pendingRequests.set(this, { url: url.toString() })
+         }
+         // eslint-disable-next-line prefer-rest-params
+         return originalOpen.apply(this, args as any)
       }
       
       XMLHttpRequest.prototype.send = async function(body?: Document | XMLHttpRequestBodyInit | null) {
@@ -93,7 +97,7 @@ export const WebPConverter = () => {
             const newFormData = new FormData()
             let modified = false
             
-            for (const [key, value] of (body as any).entries()) {
+            for (const [key, value] of Array.from(body as FormData)) {
                if (value instanceof File && value.type.startsWith('image/')) {
                   try {
                      console.log('🖼️  Found image field:', key)
@@ -129,7 +133,7 @@ export const WebPConverter = () => {
             const newFormData = new FormData()
             let modified = false
             
-            for (const [key, value] of (init.body as any).entries()) {
+            for (const [key, value] of Array.from(init.body as FormData)) {
                if (value instanceof File && value.type.startsWith('image/')) {
                   try {
                      console.log('🖼️  Found image field:', key)
