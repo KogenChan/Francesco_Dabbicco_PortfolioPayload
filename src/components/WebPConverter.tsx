@@ -4,14 +4,10 @@ import { useEffect } from 'react'
 
 export const WebPConverter = () => {
    useEffect(() => {
-      console.log('✓ WebP converter loaded')
-      
       const convertToWebP = async (file: File): Promise<File> => {
          if (!file.type.startsWith('image/')) return file
          if (file.type === 'image/webp') return file
          if (file.type === 'image/svg+xml') return file
-         
-         console.log('🔄 Converting:', file.name, (file.size / 1024 / 1024).toFixed(2) + 'MB')
          
          return new Promise((resolve, reject) => {
             const img = new Image()
@@ -20,8 +16,6 @@ export const WebPConverter = () => {
             img.onload = async () => {
                let { width, height } = img
                const isVertical = height > width
-               
-               console.log('   Original:', width + 'x' + height, isVertical ? '(vertical)' : '(horizontal)')
                
                const maxWidth = isVertical ? 2160 : 3840
                const maxHeight = isVertical ? 3840 : 2160
@@ -33,7 +27,6 @@ export const WebPConverter = () => {
                   
                   width = Math.round(width * ratio)
                   height = Math.round(height * ratio)
-                  console.log('   Resized to:', width + 'x' + height)
                }
                
                canvas.width = width
@@ -61,7 +54,6 @@ export const WebPConverter = () => {
                         file.name.replace(/\.(jpg|jpeg|png|gif|bmp)$/i, '.webp'),
                         { type: 'image/webp' }
                      )
-                     console.log('   ✓ Success:', (webpFile.size / 1024 / 1024).toFixed(2) + 'MB at ' + Math.round(quality * 100) + '%')
                      return resolve(webpFile)
                   }
                }
@@ -74,7 +66,6 @@ export const WebPConverter = () => {
          })
       }
       
-      // Intercept XMLHttpRequest to modify FormData before upload
       const originalSend = XMLHttpRequest.prototype.send
       const originalOpen = XMLHttpRequest.prototype.open
       
@@ -93,22 +84,17 @@ export const WebPConverter = () => {
       XMLHttpRequest.prototype.send = async function(body?: Document | XMLHttpRequestBodyInit | null) {
          const requestInfo = pendingRequests.get(this)
          
-         // Only intercept uploads to the media API endpoint
          if (requestInfo && requestInfo.url.includes('/api/media') && body instanceof FormData) {
-            console.log('📤 Intercepting upload to:', requestInfo.url)
-            
             const newFormData = new FormData()
             let modified = false
             
             for (const [key, value] of Array.from(body as FormData)) {
                if (value instanceof File && value.type.startsWith('image/')) {
                   try {
-                     console.log('🖼️  Found image field:', key)
                      const converted = await convertToWebP(value)
                      newFormData.append(key, converted)
                      modified = true
                   } catch (error) {
-                     console.error('❌ Conversion failed:', error)
                      newFormData.append(key, value)
                   }
                } else {
@@ -117,7 +103,6 @@ export const WebPConverter = () => {
             }
             
             if (modified) {
-               console.log('✅ Sending converted file')
                return originalSend.call(this, newFormData)
             }
          }
@@ -125,26 +110,21 @@ export const WebPConverter = () => {
          return originalSend.call(this, body)
       }
       
-      // Also intercept fetch API
       const originalFetch = window.fetch
       window.fetch = async function(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
          const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
          
          if (url.includes('/api/media') && init?.body instanceof FormData) {
-            console.log('📤 Intercepting fetch upload to:', url)
-            
             const newFormData = new FormData()
             let modified = false
             
             for (const [key, value] of Array.from(init.body as FormData)) {
                if (value instanceof File && value.type.startsWith('image/')) {
                   try {
-                     console.log('🖼️  Found image field:', key)
                      const converted = await convertToWebP(value)
                      newFormData.append(key, converted)
                      modified = true
                   } catch (error) {
-                     console.error('❌ Conversion failed:', error)
                      newFormData.append(key, value)
                   }
                } else {
@@ -153,7 +133,6 @@ export const WebPConverter = () => {
             }
             
             if (modified) {
-               console.log('✅ Sending converted file via fetch')
                return originalFetch(input, { ...init, body: newFormData })
             }
          }
@@ -168,20 +147,5 @@ export const WebPConverter = () => {
       }
    }, [])
    
-   return (
-      <div style={{ 
-         position: 'fixed', 
-         bottom: '10px', 
-         right: '10px', 
-         background: '#10b981', 
-         color: 'white', 
-         padding: '4px 8px',
-         borderRadius: '4px',
-         fontSize: '11px',
-         zIndex: 9999,
-         fontFamily: 'monospace'
-      }}>
-      WebP ✓
-      </div>
-   )
+   return null
 };
