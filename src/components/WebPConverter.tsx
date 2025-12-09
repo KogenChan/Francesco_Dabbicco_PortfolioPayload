@@ -13,13 +13,20 @@ export const WebPConverter = () => {
             const img = new Image()
             const canvas = document.createElement('canvas')
 
-            img.onload = () => {
-               const maxHeight = 2440 // # SIZE
+            img.onload = async () => {
                let { width, height } = img
+               const isVertical = height > width
 
-               if (height > maxHeight) {
-                  width = (width / height) * maxHeight
-                  height = maxHeight
+               const maxWidth = isVertical ? 2160 : 3840
+               const maxHeight = isVertical ? 3840 : 2160
+
+               if (width > maxWidth || height > maxHeight) {
+                  const widthRatio = maxWidth / width
+                  const heightRatio = maxHeight / height
+                  const ratio = Math.min(widthRatio, heightRatio)
+
+                  width = Math.round(width * ratio)
+                  height = Math.round(height * ratio)
                }
 
                canvas.width = width
@@ -33,24 +40,40 @@ export const WebPConverter = () => {
 
                ctx.drawImage(img, 0, 0, width, height)
 
-               canvas.toBlob(
-                  (blob) => {
-                     if (!blob) {
-                        reject(new Error('Conversion failed'))
-                        return
-                     }
+               const maxFileSize = 4.5 * 1024 * 1024
+               let quality = 0.85
+               const minQuality = 0.75
 
-                     const webpFile = new File(
-                        [blob],
-                        file.name.replace(/\.(jpg|jpeg|png|gif|bmp)$/i, '.webp'),
-                        { type: 'image/webp' }
+               const tryConvert = (currentQuality: number): Promise<Blob | null> => {
+                  return new Promise((res) => {
+                     canvas.toBlob(
+                        (blob) => res(blob),
+                        'image/webp',
+                        currentQuality
                      )
+                  })
+               }
 
-                     resolve(webpFile)
-                  },
-                  'image/webp',
-                  0.85 // # QUALITY
+               let blob = await tryConvert(quality)
+
+               while (blob && blob.size > maxFileSize && quality > minQuality) {
+                  quality -= 0.05
+                  if (quality < minQuality) quality = minQuality
+                  blob = await tryConvert(quality)
+               }
+
+               if (!blob) {
+                  reject(new Error('Conversion failed'))
+                  return
+               }
+
+               const webpFile = new File(
+                  [blob],
+                  file.name.replace(/\.(jpg|jpeg|png|gif|bmp)$/i, '.webp'),
+                  { type: 'image/webp' }
                )
+
+               resolve(webpFile)
             }
 
             img.onerror = () => reject(new Error('Failed to load image'))
