@@ -31,7 +31,7 @@ export async function convertToWebP(file: File): Promise<File> {
                resolve(webpFile)
             },
             'image/webp',
-            0.9 // Quality: 0.9 = 90% (adjust as needed)
+            0.8 // Quality: 0.9 = 90% (adjust as needed)
          )
       }
       
