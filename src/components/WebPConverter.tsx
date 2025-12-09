@@ -27,7 +27,10 @@ export const WebPConverter = () => {
                const maxHeight = isVertical ? 3840 : 2160
                
                if (width > maxWidth || height > maxHeight) {
-                  const ratio = Math.min(maxWidth / width, maxHeight / height)
+                  const widthRatio = maxWidth / width
+                  const heightRatio = maxHeight / height
+                  const ratio = Math.min(widthRatio, heightRatio)
+                  
                   width = Math.round(width * ratio)
                   height = Math.round(height * ratio)
                   console.log('   Resized to:', width + 'x' + height)
@@ -178,7 +181,7 @@ export const WebPConverter = () => {
          zIndex: 9999,
          fontFamily: 'monospace'
       }}>
-         WebP ✓
+      WebP ✓
       </div>
    )
 };
