@@ -30,7 +30,6 @@ export const Media: CollectionConfig = {
          required: false,
          admin: {
             description: 'If this is an additional image, link to the main work here (auto-set when used as additional image)',
-            readOnly: true,
          },
       },
       {
