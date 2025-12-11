@@ -177,6 +177,10 @@ export interface Media {
     [k: string]: unknown;
   } | null;
   /**
+   * If this is an additional image, link to the main work here
+   */
+  mainWork?: (string | null) | Media;
+  /**
    * Additional images for this work (e.g., detail shots, alternate views)
    */
   additionalImages?: (string | Media)[] | null;
@@ -496,6 +500,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  mainWork?: T;
   additionalImages?: T;
   updatedAt?: T;
   createdAt?: T;

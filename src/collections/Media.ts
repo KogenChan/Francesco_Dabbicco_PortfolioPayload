@@ -29,7 +29,8 @@ export const Media: CollectionConfig = {
          hasMany: false,
          required: false,
          admin: {
-            description: 'If this is an additional image, link to the main work here',
+            description: 'If this is an additional image, link to the main work here (auto-set when used as additional image)',
+            readOnly: true,
          },
       },
       {
@@ -43,6 +44,67 @@ export const Media: CollectionConfig = {
          },
       },
    ],
+   hooks: {
+      afterChange: [
+         async ({ doc, req, previousDoc }) => {
+            // Get the additional images array
+            const additionalImages = doc.additionalImages || [];
+            const previousAdditionalImages = previousDoc?.additionalImages || [];
+
+            // Convert to arrays of IDs for comparison
+            const currentIds = additionalImages.map((img: any) => 
+               typeof img === 'string' ? img : img.id
+            );
+            const previousIds = previousAdditionalImages.map((img: any) =>
+               typeof img === 'string' ? img : img.id
+            );
+
+            // Find newly added images
+            const newlyAdded = currentIds.filter((id: any) => !previousIds.includes(id));
+
+            // Update mainWork for newly added additional images
+            if (newlyAdded.length > 0) {
+               for (const imageId of newlyAdded) {
+                  await req.payload.update({
+                     collection: 'media',
+                     id: imageId as string,
+                     data: {
+                        mainWork: doc.id,
+                     },
+                  });
+               }
+            }
+
+            // Find removed images and clear their mainWork if it points to this doc
+            const removed = previousIds.filter((id: any) => !currentIds.includes(id));
+            if (removed.length > 0) {
+               for (const imageId of removed) {
+                  // Fetch the image to check if its mainWork points to this doc
+                  const image = await req.payload.findByID({
+                     collection: 'media',
+                     id: imageId as string,
+                  });
+
+                  const mainWorkId = typeof image.mainWork === 'string' 
+                     ? image.mainWork 
+                     : image.mainWork?.id;
+
+                  if (mainWorkId === doc.id) {
+                     await req.payload.update({
+                        collection: 'media',
+                        id: imageId as string,
+                        data: {
+                           mainWork: null,
+                        },
+                     });
+                  }
+               }
+            }
+
+            return doc;
+         },
+      ],
+   },
    upload: {
       staticDir: 'media',
       imageSizes: [
