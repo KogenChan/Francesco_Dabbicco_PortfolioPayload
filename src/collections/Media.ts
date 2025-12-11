@@ -23,6 +23,16 @@ export const Media: CollectionConfig = {
          },
       },
       {
+         name: 'mainWork',
+         type: 'relationship',
+         relationTo: 'media',
+         hasMany: false,
+         required: false,
+         admin: {
+            description: 'If this is an additional image, link to the main work here',
+         },
+      },
+      {
          name: 'additionalImages',
          type: 'relationship',
          relationTo: 'media',
