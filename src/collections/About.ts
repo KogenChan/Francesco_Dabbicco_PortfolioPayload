@@ -23,7 +23,23 @@ export const About: CollectionConfig = {
          }),
       },
       {
-         name: "history",
+         name: "exhibits",
+         type: "richText",
+         required: true,
+         editor: lexicalEditor({
+            features: ({ defaultFeatures }) => defaultFeatures,
+         }),
+      },
+      {
+         name: "publications",
+         type: "richText",
+         required: true,
+         editor: lexicalEditor({
+            features: ({ defaultFeatures }) => defaultFeatures,
+         }),
+      },
+      {
+         name: "illustrations",
          type: "richText",
          required: true,
          editor: lexicalEditor({
