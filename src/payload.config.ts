@@ -58,6 +58,7 @@ export default buildConfig({
       'https://fdart-payload.vercel.app',
       'https://*.vercel.app',
       'https://francescodabbiccoart.com',
+      'https://www.francescodabbiccoart.com',
       process.env.FRONTEND_URL,
    ].filter((url): url is string => Boolean(url)),
    serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
