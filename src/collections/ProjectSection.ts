@@ -54,5 +54,11 @@ export const ProjectSection: CollectionConfig = {
             description: "Optional gallery to display below the section",
          },
       },
+      {
+         name: "mainProject",
+         type: "relationship",
+         relationTo: "project-section",
+         required: false,
+      },
    ],
 };
