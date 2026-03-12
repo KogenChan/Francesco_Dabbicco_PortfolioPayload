@@ -5,7 +5,7 @@ import { byRoleWithPublicRead } from '../access/byRole';
 export const ProjectSection: CollectionConfig = {
    slug: "project-section",
    admin: {
-      useAsTitle: "title",
+      useAsTitle: "slug",
    },
    access: byRoleWithPublicRead(['admin', 'client']),
    fields: [
