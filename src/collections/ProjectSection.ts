@@ -56,8 +56,12 @@ export const ProjectSection: CollectionConfig = {
       },
       {
          name: "destination",
-         type: "text",
+         type: "select",
          required: false,
+         options: [
+            { label: "Works", value: "works" },
+            { label: "Installations", value: "installations" },
+         ],
       },
       {
          name: "mainProject",
