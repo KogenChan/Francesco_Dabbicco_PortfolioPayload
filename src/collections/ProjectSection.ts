@@ -55,6 +55,11 @@ export const ProjectSection: CollectionConfig = {
          },
       },
       {
+         name: "destination",
+         type: "text",
+         required: false,
+      },
+      {
          name: "mainProject",
          type: "relationship",
          relationTo: "project-section",
