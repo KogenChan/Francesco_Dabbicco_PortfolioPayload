@@ -9,7 +9,15 @@ export const About: CollectionConfig = {
       {
          name: "statement",
          type: "richText",
-         required: true,
+         validate: (value, options) => {
+            const { locale, req } = options as any;
+            const defaultLocale = req?.payload?.config?.localization?.defaultLocale ?? 'en';
+            if (locale === defaultLocale && !value) {
+               return 'This field is required';
+            }
+            return true;
+         },
+         localized: true,
          editor: lexicalEditor({
             features: ({ defaultFeatures }) => defaultFeatures,
          }),
@@ -17,7 +25,15 @@ export const About: CollectionConfig = {
       {
          name: "bio",
          type: "richText",
-         required: true,
+         validate: (value, options) => {
+            const { locale, req } = options as any;
+            const defaultLocale = req?.payload?.config?.localization?.defaultLocale ?? 'en';
+            if (locale === defaultLocale && !value) {
+               return 'This field is required';
+            }
+            return true;
+         },
+         localized: true,
          editor: lexicalEditor({
             features: ({ defaultFeatures }) => defaultFeatures,
          }),
@@ -25,7 +41,15 @@ export const About: CollectionConfig = {
       {
          name: "exhibits",
          type: "richText",
-         required: true,
+         validate: (value, options) => {
+            const { locale, req } = options as any;
+            const defaultLocale = req?.payload?.config?.localization?.defaultLocale ?? 'en';
+            if (locale === defaultLocale && !value) {
+               return 'This field is required';
+            }
+            return true;
+         },
+         localized: true,
          editor: lexicalEditor({
             features: ({ defaultFeatures }) => defaultFeatures,
          }),
@@ -33,7 +57,15 @@ export const About: CollectionConfig = {
       {
          name: "publications",
          type: "richText",
-         required: true,
+         validate: (value, options) => {
+            const { locale, req } = options as any;
+            const defaultLocale = req?.payload?.config?.localization?.defaultLocale ?? 'en';
+            if (locale === defaultLocale && !value) {
+               return 'This field is required';
+            }
+            return true;
+         },
+         localized: true,
          editor: lexicalEditor({
             features: ({ defaultFeatures }) => defaultFeatures,
          }),
@@ -41,7 +73,15 @@ export const About: CollectionConfig = {
       {
          name: "illustrations",
          type: "richText",
-         required: true,
+         validate: (value, options) => {
+            const { locale, req } = options as any;
+            const defaultLocale = req?.payload?.config?.localization?.defaultLocale ?? 'en';
+            if (locale === defaultLocale && !value) {
+               return 'This field is required';
+            }
+            return true;
+         },
+         localized: true,
          editor: lexicalEditor({
             features: ({ defaultFeatures }) => defaultFeatures,
          }),

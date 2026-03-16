@@ -34,6 +34,11 @@ export default buildConfig({
          ],
       },
    },
+   localization: {
+    locales: ['en', 'it'],
+    defaultLocale: 'it',
+    fallback: true,
+   },
    collections: [
       Users,
       Media,

@@ -21,12 +21,21 @@ export const ProjectSection: CollectionConfig = {
       {
          name: "title",
          type: "text",
-         required: true,
+         validate: (value: any, options: any) => {
+            const { locale, req } = options;
+            const defaultLocale = req?.payload?.config?.localization?.defaultLocale ?? 'en';
+            if (locale === defaultLocale && !value) {
+               return 'This field is required';
+            }
+            return true;
+         },
+         localized: true,
       },
       {
          name: "subtitle",
          type: "text",
          required: false,
+         localized: true,
          admin: {
             description: "Optional subtitle for the project section",
          },
@@ -34,7 +43,15 @@ export const ProjectSection: CollectionConfig = {
       {
          name: "description",
          type: "richText",
-         required: true,
+         validate: (value: any, options: any) => {
+            const { locale, req } = options;
+            const defaultLocale = req?.payload?.config?.localization?.defaultLocale ?? 'en';
+            if (locale === defaultLocale && !value) {
+               return 'This field is required';
+            }
+            return true;
+         },
+         localized: true,
          editor: lexicalEditor({
             features: ({ defaultFeatures }) => defaultFeatures,
          }),

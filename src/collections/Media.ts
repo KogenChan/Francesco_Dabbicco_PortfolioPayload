@@ -15,6 +15,7 @@ export const Media: CollectionConfig = {
          name: 'caption',
          type: 'richText',
          required: false,
+         localized: true,
          editor: lexicalEditor({
             features: ({ defaultFeatures }) => defaultFeatures,
          }),
