@@ -1,4 +1,3 @@
-// payload.config.ts
 import { mongooseAdapter } from '@payloadcms/db-mongodb';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { s3Storage } from '@payloadcms/storage-s3';
@@ -7,11 +6,8 @@ import { buildConfig } from 'payload';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 
-// Existing collections
 import { Users } from './collections/Users';
 import { Media } from './collections/Media';
-
-// New collections for homepage
 import { HomepageHero } from './collections/HomepageHero';
 import { CarouselItem } from './collections/CarouselItem';
 import { ProjectSection } from './collections/ProjectSection';
@@ -29,15 +25,17 @@ export default buildConfig({
       },
       components: {
          afterNavLinks: [
-            // Fixed path - no ./src prefix needed
             '/components/WebPConverter#WebPConverter',
          ],
       },
    },
    localization: {
-    locales: ['en', 'it'],
-    defaultLocale: 'it',
-    fallback: true,
+      locales: [
+         { label: 'Italiano', code: 'it' },
+         { label: 'English', code: 'en' },
+      ],
+      defaultLocale: 'it',
+      fallback: true,
    },
    collections: [
       Users,
@@ -72,7 +70,7 @@ export default buildConfig({
          collections: {
             media: {
                disablePayloadAccessControl: true,
-               generateFileURL: ({ filename }) => {
+               generateFileURL: ({ filename }: { filename: string }) => {
                   return `${process.env.S3_PUBLIC_URL}/${filename}`;
                },
             },
